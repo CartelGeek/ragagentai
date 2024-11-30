@@ -1,0 +1,27 @@
+
+ import "./thread.zmodel"
+  import "./user.zmodel"
+
+model Message {
+
+    id          String   @id @default(uuid())
+    answer      String
+    string      String?
+    type        String?
+
+    userId      String?  @default(auth().id)
+    user        User?    @relation(fields: [userId], references: [id], name: "userMessage")
+    threadId    String?
+    thread      Thread?  @relation(fields: [threadId], references: [id], name: "question")
+    dateCreated DateTime @default(now())
+    dateUpdated DateTime @updatedAt @default(now())
+
+    //admin of the app can do everything
+    @@allow('all', auth().roles?[name == 'admin'])
+
+    // user can access their thread and do everything
+    @@allow("all", user == auth())
+
+    // owner of an organizaiton can see and do everything on the messages
+    @@allow("all", thread.organization.roles?[user == auth() && name == 'owner'])
+}

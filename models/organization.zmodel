@@ -1,0 +1,29 @@
+import "./organizationRole.zmodel";
+
+import './organizationRole.zmodel'
+
+import './thread.zmodel'
+
+import './ragVector.zmodel'
+
+
+model Organization {
+    id               String             @id @default(uuid())
+    name             String
+    pictureUrl       String?            @default('https://i.imgur.com/BgkFiid.jpeg')
+
+    stripeCustomerId String?
+
+    dateCreated      DateTime           @default(now())
+    dateUpdated      DateTime           @updatedAt @default(now())
+    roles            OrganizationRole[]
+
+    threads          Thread[]           @relation("organization")
+    ragVectors       RagVector[]        @relation("ragVector")
+
+    @@allow('all', auth().roles?[name == 'admin'])
+
+    @@allow('all', roles?[user == auth() && name == 'owner'])
+    @@allow('read', roles?[user == auth()])
+    @@allow("create", auth().id != null)
+}

@@ -1,0 +1,22 @@
+
+ import "./organization.zmodel"
+
+model RagVector {
+    id             String        @id @default(uuid())
+    title          String?
+    key            String
+    url            String?
+    tags           String[]      @default([])
+    vectors        Bytes?        @omit
+    documents      Bytes?        @omit
+    organizationId String?
+    organization   Organization? @relation(fields: [organizationId], references: [id], name: 'ragVector')
+
+    dateCreated    DateTime      @default(now())
+
+    @@allow('all', auth().roles?[name == 'admin'])
+
+    @@allow("all", organization.roles?[user == auth()])
+    // only owner of an organization can delete a rag file
+    @@allow("delete", organization.roles?[user == auth() && name == 'owner'])
+}
